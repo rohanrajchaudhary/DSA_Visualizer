@@ -14,6 +14,9 @@ A web-based interactive tool built using pure HTML, CSS, and JavaScript to demon
   - Backtracking (N-Queens , Sudoku Solver)
   - Trees (Binary Search Trees, AVL Trees)
   - Graphs (BFS, DFS, Dijkstra's Algorithm)
+  - Dynamic Programming (LCS , LIS , Knapsack ,Fibonacci)
+  - Greedy Algorithm (Huffaman Coding , Activity Seliction)
+  - Mathmatical Algorithm (GCD , Prime Factorization , Sieve of Eratosthenes) 
 - **Step-by-Step Controls** (Play/Pause/Reset/Speed Adjustment)
 - **Dynamic Code Snippets** to explain algorithm logic
 - **Responsive Design** for seamless use on any device
