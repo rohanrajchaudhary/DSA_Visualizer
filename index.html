@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Visualizer</title>
+    <button><a href="search.html">SEARCHING ALGORITHM</a></button>
+    <button><a href="graph.html">GRAPH ALGORITHM</a></button>
+    <button><a href="dp.html">DYNAMIC PROGRAMMING ALGORITHM</a></button>
+    <button><a href="greedy.html">GREEDY ALGORITHM</a></button>
+    <button><a href="backtracking.html">BACKTRACKING ALGORITHM</a></button>
+    <button><a href="trees.html">TREES ALGORITHM</a></button>
+    <button><a href="math.html">MATH ALGORITHM</a></button>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .algo-section {
+            background: #3735352d;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .visualization-container {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        canvas {
+            background: white;
+            border-radius: 4px;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #63f078;
+            border: none;
+            padding: 10px 20px;
+            color: rgb(15, 14, 14);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        select, input[type="range"] {
+            padding: 8px;
+            border-radius: 4px;
+            background: #333;
+            color: white;
+            border: 1px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="algo-section">
+            <h2>ALGORITHM SYLLABUS IN BOX</h2>
+            <select id="algorithmSelector">
+                <optgroup label="Sorting">
+                    <option value="bubbleSort">Bubble Sort</option>
+                    <option value="quickSort">Quick Sort</option>
+                    <option value="mergeSort">Merge Sort</option>
+                    <option value="selectionSort"> Selection Sort</option>
+                    <option value=" insertionSort"> Insertion Sort</option>
+                    
+                </optgroup>
+                <optgroup label="Searching">
+                    <option value="linearSearch">Linear Search</option>
+                    <option value="binarySearch">Binary Search</option>
+                </optgroup>
+
+                <optgroup label="Graph Algorithms">
+                  <option value="BFS">BFS</option>
+                  <option value="DFS">DFS</option>
+                  <option value="Dijkstra’s">Dijkstra’s</option>
+                  <option value="Prim’s">Prim’s</option>
+                  <option value="Kruskal’s">Kruskal’s</option>
+                </optgroup>
+
+                <optgroup label="Dynamic Programming">
+                  <option value="Fibonacci">Fibonacci</option>
+                  <option value="Knapsack">Knapsack</option>
+                  <option value=" LCS"> LCS</option>
+                  <option value=" LIS"> LIS</option>
+                </optgroup>
+
+                <optgroup label="Greedy Algorithms">
+                  <option value=" Activity Selection"> Activity Selection</option>
+                  <option value=" Huffman Coding
+                  "> Huffman Coding
+                </option>
+                 
+                </optgroup>
+
+                <optgroup label="Backtracking">
+                  <option value="N-Queens">N-Queens</option>
+                  <option value="Sudoku Solver
+                  ">Sudoku Solver
+                </option>
+                </optgroup>
+
+                <optgroup label="Tree Algorithms">
+                  <option value="Tree Traversals">Tree Traversals</option>
+                  <option value=" BST Operations"> BST Operations</option>
+                  <option value="AVL Rotations">AVL Rotations</option>
+                  <option value="LCA
+                  ">LCA
+                </option>
+
+                </optgroup>
+
+                <optgroup label="Mathematical Algorithms">
+                  <option value="GCD (Euclidean)">GCD (Euclidean)</option>
+                  <option value="Prime Factorization">Prime Factorization</option>
+                  <option value="Sieve of Eratosthenes">Sieve of Eratosthenes</option>
+
+                </optgroup>
+
+
+
+                
+
+
+
+                 
+                
+                <!-- Add more algorithm options -->
+            </select>
+
+            <div class="controls">
+                <button onclick="generateNewArray()">Generate New Array</button>
+                <button onclick="startVisualization()">Start</button>
+                <button onclick="stopVisualization()">Stop</button>
+                <label>Speed: </label>
+                <input type="range" id="speed" min="1" max="100" value="50">
+            </div>
+
+
+            <div class="visualization-container">
+                <canvas id="canvas" width="800" height="400"></canvas>
+            </div>
+
+            <div id="explanation"></div>
+            <div id="complexity"></div>
+        </div>
+    </div>
+
+    <script>
+        let arr = [];
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isSorting = false;
+
+        // Initialize array
+        function generateNewArray() {
+            arr = Array.from({length: 20}, () => Math.floor(Math.random() * 90) + 10);
+            drawArray();
+        }
+
+        function drawArray(highlight = []) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const barWidth = canvas.width / arr.length;
+            
+            arr.forEach((value, i) => {
+                ctx.fillStyle = highlight.includes(i) ? '#ff0000' : '#4CAF50';
+                ctx.fillRect(i * barWidth, canvas.height - value * 4, barWidth - 2, value * 4);
+            });
+        }
+
+        // Sorting Algorithms
+
+        // bubbleSort algorithm
+        async function bubbleSort() {
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = 0; j < arr.length - i - 1; j++) {
+                    if (arr[j] > arr[j + 1]) {
+                        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                        drawArray([j, j + 1]);
+                        await sleep();
+                    }
+                }
+            }
+        }
+
+        // Quick Sort algorithm
+async function quickSort(start = 0, end = arr.length - 1) {
+    if (start >= end) return;
+    
+    let index = await partition(start, end);
+    await Promise.all([
+        quickSort(start, index - 1),
+        quickSort(index + 1, end)
+    ]);
+}
+
+async function partition(start, end) {
+    let pivotIndex = start;
+    let pivotValue = arr[end];
+    
+    for (let i = start; i < end; i++) {
+        if (arr[i] < pivotValue) {
+            [arr[i], arr[pivotIndex]] = [arr[pivotIndex], arr[i]];
+            pivotIndex++;
+            drawArray([i, pivotIndex, end]);
+            await sleep();
+        }
+    }
+    
+    [arr[pivotIndex], arr[end]] = [arr[end], arr[pivotIndex]];
+    return pivotIndex;
+}
+
+function selectionSort(arr) {
+  for (let i = 0; i < arr.length - 1; i++) {
+    let minIndex = i;
+    
+    // Find the index of the minimum element in the unsorted portion
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[j] < arr[minIndex]) {
+        minIndex = j;
+      }
+    }
+    
+    // Swap the minimum element with the first unsorted element
+    if (minIndex !== i) {
+      [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+    }
+  }
+  return arr;
+}
+
+// Example usage:
+const unsortedArray = [64, 25, 12, 22, 11];
+console.log(selectionSort(unsortedArray)); // Output: [11, 12, 22, 25, 64]
+
+
+// Selection Sort algorithm
+async function selectionSort() {
+    for (let i = 0; i < arr.length - 1; i++) {
+        let minIndex = i;
+        
+        // Highlight initial minimum
+        drawArray([i, minIndex], 'compare');
+        await sleep();
+
+        for (let j = i + 1; j < arr.length; j++) {
+            // Highlight comparison
+            drawArray([j, minIndex], 'compare');
+            await sleep();
+            
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+                // Highlight new minimum
+                drawArray([minIndex], 'min');
+                await sleep();
+            }
+        }
+
+        if (minIndex !== i) {
+            // Perform swap and visualize
+            [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+            drawArray([i, minIndex], 'swap');
+            await sleep();
+        }
+        
+        // Mark sorted position
+        drawArray([i], 'sorted');
+        await sleep();
+    }
+    // Mark last element as sorted
+    drawArray([arr.length - 1], 'sorted');
+}
+
+// Update drawArray() to handle new types
+function drawArray(highlightIndices = [], type = 'default') {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barWidth = canvas.width / arr.length;
+    
+    arr.forEach((value, idx) => {
+        ctx.fillStyle = highlightIndices.includes(idx) ?
+            type === 'compare' ? '#ff0000' :       // Red for comparisons
+            type === 'min' ? '#ffa500' :           // Orange for new minimum
+            type === 'swap' ? '#0000ff' :           // Blue for swaps
+            type === 'sorted' ? '#00ff00' :         // Green for sorted
+            '#4CAF50' :                            // Default color
+            '#4CAF50';                              // Base color
+        
+        ctx.fillRect(
+            idx * barWidth,
+            canvas.height - value * 4,
+            barWidth - 2,
+            value * 4
+        );
+    });
+}
+
+
+
+// Insertion Sort algorithm
+async function insertionSort() {
+    for (let i = 1; i < arr.length; i++) {
+        let current = arr[i];
+        let j = i - 1;
+        
+        // Highlight current element
+        drawArray([i], 'current');
+        await sleep();
+
+        while (j >= 0 && arr[j] > current) {
+            // Highlight comparison
+            drawArray([j, j + 1], 'compare');
+            await sleep();
+            
+            // Shift element
+            arr[j + 1] = arr[j];
+            drawArray([j, j + 1], 'shift');
+            await sleep();
+            
+            j--;
+        }
+
+        // Insert current element
+        arr[j + 1] = current;
+        drawArray([j + 1], 'insert');
+        await sleep();
+    }
+}
+
+// Update drawArray() with new color codes
+function drawArray(highlightIndices = [], type = 'default') {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barWidth = canvas.width / arr.length;
+    
+    arr.forEach((value, idx) => {
+        ctx.fillStyle = highlightIndices.includes(idx) ?
+            type === 'current' ? '#FF69B4' :       // Hot pink - current element
+            type === 'compare' ? '#FF0000' :       // Red - comparison
+            type === 'shift' ? '#FFA500' :          // Orange - shifting
+            type === 'insert' ? '#00FF00' :        // Green - final position
+            '#4CAF50' :                            // Default green
+            '#4CAF50';                              // Base color
+        
+        ctx.fillRect(
+            idx * barWidth,
+            canvas.height - value * 4,
+            barWidth - 2,
+            value * 4
+        );
+    });
+}
+
+
+// merge sort algorithm
+async function mergeSort(start = 0, end = arr.length - 1) {
+    if (start >= end) return;
+    
+    const mid = Math.floor((start + end) / 2);
+    
+    await mergeSort(start, mid);
+    await mergeSort(mid + 1, end);
+    await merge(start, mid, end);
+}
+
+async function merge(start, mid, end) {
+    const left = arr.slice(start, mid + 1);
+    const right = arr.slice(mid + 1, end + 1);
+    
+    let i = 0, j = 0, k = start;
+    
+    while (i < left.length && j < right.length) {
+        // Highlight compared elements
+        drawArray([start + i, mid + 1 + j]);
+        await sleep();
+        
+        if (left[i] <= right[j]) {
+            arr[k] = left[i];
+            i++;
+        } else {
+            arr[k] = right[j];
+            j++;
+        }
+        
+        // Highlight the position being updated
+        drawArray([k]);
+        await sleep();
+        k++;
+    }
+
+    // Handle remaining elements
+    while (i < left.length) {
+        arr[k] = left[i];
+        drawArray([k]);
+        await sleep();
+        i++;
+        k++;
+    }
+
+    while (j < right.length) {
+        arr[k] = right[j];
+        drawArray([k]);
+        await sleep();
+        j++;
+        k++;
+    }
+}
+
+// Add search logic
+
+        // Binary Search algorithm
+async function binarySearch() {
+    const target = parseInt(document.getElementById('searchTarget').value);
+    let low = 0, high = arr.length - 1;
+    let found = -1;
+
+    // Ensure array is sorted
+    arr.sort((a, b) => a - b);
+    drawArray();
+    await sleep();
+
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        
+        // Visualize current range and mid
+        drawArray([mid], 'mid');
+        drawArray([low, high], 'range');
+        await sleep();
+
+        if (arr[mid] === target) {
+            found = mid;
+            break;
+        }
+        
+        if (arr[mid] < target) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    // Show final result
+    if (found !== -1) {
+        drawArray([found], 'found');
+    } else {
+        drawArray([], 'notFound');
+    }
+    await sleep();
+}
+
+// Update drawArray() with new colors
+function drawArray(highlightIndices = [], type = 'default') {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barWidth = canvas.width / arr.length;
+    
+    // Draw base array
+    arr.forEach((value, idx) => {
+        ctx.fillStyle = '#4CAF50'; // Default green
+        ctx.fillRect(
+            idx * barWidth,
+            canvas.height - value * 4,
+            barWidth - 2,
+            value * 4
+        );
+    });
+
+    // Draw highlights
+    highlightIndices.forEach(idx => {
+        ctx.fillStyle = type === 'mid' ? '#FFA500' :       // Orange mid
+                        type === 'range' ? 'rgba(255, 255, 0, 0.3)' : // Yellow range
+                        type === 'found' ? '#00FF00' :     // Green found
+                        '#FF0000';                         // Red not found
+        
+        if (type === 'range') {
+            // Draw range overlay
+            ctx.fillRect(
+                idx * barWidth,
+                0,
+                barWidth,
+                canvas.height
+            );
+        } else {
+            // Draw element highlight
+            ctx.fillRect(
+                idx * barWidth,
+                canvas.height - arr[idx] * 4,
+                barWidth - 2,
+                arr[idx] * 4
+            );
+        }
+    });
+}
+
+        // linearSearch algorithm
+        async function linearSearch() {
+    const target = parseInt(document.getElementById('searchTarget').value);
+    let found = false;
+
+    for (let i = 0; i < arr.length; i++) {
+        // Highlight current element
+        drawArray([i], 'searching');
+        await sleep();
+        
+        if (arr[i] === target) {
+            drawArray([i], 'found');
+            await sleep();
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        drawArray([], 'notFound');
+        await sleep();
+    }
+}
+
+// Update drawArray() with search states
+function drawArray(highlightIndices = [], type = 'default') {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barWidth = canvas.width / arr.length;
+    
+    arr.forEach((value, idx) => {
+        ctx.fillStyle = highlightIndices.includes(idx) ?
+            type === 'searching' ? '#FFFF00' :    // Yellow - searching
+            type === 'found' ? '#00FF00' :        // Green - found
+            type === 'notFound' ? '#FF0000' :     // Red - not found
+            '#4CAF50' :                           // Default
+            '#4CAF50';                             // Base
+        
+        ctx.fillRect(
+            idx * barWidth,
+            canvas.height - value * 4,
+            barWidth - 2,
+            value * 4
+        );
+    });
+
+    
+}
+
+        // Graph Algorithms
+
+        
+        class Graph {
+            constructor() {
+                this.nodes = [];
+                this.edges = {};
+            }
+
+            addNode(node) {
+                this.nodes.push(node);
+                this.edges[node] = [];
+            }
+
+            addEdge(node1, node2) {
+                this.edges[node1].push(node2);
+                this.edges[node2].push(node1);
+            }
+        }
+
+        // Helper functions
+        function sleep() {
+            return new Promise(resolve => 
+                setTimeout(resolve, 200 - document.getElementById('speed').value)
+            );
+        }
+
+        function startVisualization() {
+            const algorithm = document.getElementById('algorithmSelector').value;
+            isSorting = true;
+            
+            switch(algorithm) {
+                case 'bubbleSort':
+                    bubbleSort();
+                    break;
+                case 'binarySearch':
+                    binarySearch();
+                    break;
+                    
+                case 'mergeSort':
+                      mergeSort();
+                      break; 
+                 case 'quickSort':
+                       quickSort();
+                       break;
+
+                case 'selectionSort':
+                      selectionSort();
+                      break;
+
+
+                case 'insertionSort':
+                      insertionSort();
+                      break;
+
+                 case 'linearSearch':
+                       linearSearch();
+                       break;
+
+                 case 'bfs':
+                       bfs();
+                       break;
+
+                      
+                // Add cases for other algorithms
+            }
+        }
+
+        // Initial setup
+        generateNewArray();
+
+        // Add explanations and complexity information
+        const explanations = {
+            bubbleSort: {
+                desc: "Bubble Sort repeatedly swaps adjacent elements if they're in the wrong order.",
+                complexity: "Time: O(n²), Space: O(1)"
+            },
+
+            mergeSort: {
+            desc: "Merge Sort divides the array into halves, sorts them recursively, and merges the sorted halves.",
+            complexity: "Time: O(n log n), Space: O(n)"
+            },
+
+       
+            quickSort: {
+            desc: "Quick Sort is a divide-and-conquer algorithm that selects a 'pivot' element and partitions the array around the pivot, sorting elements smaller than the pivot before it and elements larger after it.",
+            complexity: "Average: O(n log n) time, Worst: O(n²) time | Space: O(log n)"
+            },
+
+
+      
+             selectionSort: {
+            desc: "Selection Sort works by repeatedly finding the minimum element from the unsorted portion and swapping it with the first unsorted element.",
+            complexity: "Time: O(n²) in all cases | Space: O(1)"
+            },
+
+            
+            insertionSort: {
+            desc: "Insertion Sort builds the final sorted array one item at a time by repeatedly inserting the next element into its correct position in the sorted portion.",
+            complexity: "Time: O(n²) worst/average, O(n) best | Space: O(1)"
+            },
+
+            
+    linearSearch: {
+        desc: "Linear Search sequentially checks each element until a match is found.",
+        complexity: "Time: O(n) | Space: O(1)"
+    },
+
+    binarySearch: {
+        desc: "Binary Search efficiently finds a target in a sorted array by repeatedly dividing the search interval in half.",
+        complexity: "Time: O(log n) | Space: O(1)"
+    },
+
+    bfs: {
+        desc: "BFS explores graph level by level using a queue, visiting all neighbors of a node before moving to next level.",
+        complexity: "Time: O(V + E) | Space: O(V)"
+    },
+
+
+
+
+
+            // Add other algorithms' explanations
+        };
+
+        // Update explanation when algorithm changes
+        document.getElementById('algorithmSelector').addEventListener('change', () => {
+            const algo = document.getElementById('algorithmSelector').value;
+            document.getElementById('explanation').textContent = explanations[algo].desc;
+            document.getElementById('complexity').textContent = explanations[algo].complexity;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab-link {
+            padding: 10px 20px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .tab-link.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 5px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .visualization {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .dp-table {
+            display: inline-grid;
+            grid-gap: 1px;
+            background-color: #ddd;
+            margin: 10px;
+        }
+
+        .dp-cell {
+            padding: 10px;
+            background-color: white;
+            text-align: center;
+            min-width: 40px;
+        }
+
+        .highlight {
+            background-color: #90EE90;
+        }
+
+        .sequence {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .sequence-item {
+            padding: 8px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="tabs">
+        <button class="tab-link active" onclick="openTab(event, 'fibonacci')">Fibonacci</button>
+        <button class="tab-link" onclick="openTab(event, 'knapsack')">Knapsack</button>
+        <button class="tab-link" onclick="openTab(event, 'lcs')">LCS</button>
+        <button class="tab-link" onclick="openTab(event, 'lis')">LIS</button>
+    </div>
+
+    <!-- Fibonacci Tab -->
+    <div id="fibonacci" class="tab-content active">
+        <div class="input-group">
+            <input type="number" id="fibInput" placeholder="Enter n" min="0">
+            <button onclick="visualizeFibonacci()">Visualize</button>
+        </div>
+        <div id="fibVisualization" class="visualization"></div>
+    </div>
+
+    <!-- Knapsack Tab -->
+    <div id="knapsack" class="tab-content">
+        <div class="input-group">
+            Capacity: <input type="number" id="capacity" min="1">
+            Weights: <input type="text" id="weights" placeholder="e.g., 2 3 4">
+            Values: <input type="text" id="values" placeholder="e.g., 3 4 5">
+            <button onclick="visualizeKnapsack()">Visualize</button>
+        </div>
+        <div id="knapsackVisualization" class="visualization"></div>
+    </div>
+
+    <!-- LCS Tab -->
+    <div id="lcs" class="tab-content">
+        <div class="input-group">
+            String 1: <input type="text" id="str1" placeholder="e.g., ABCBDAB">
+            String 2: <input type="text" id="str2" placeholder="e.g., BDCABA">
+            <button onclick="visualizeLCS()">Visualize</button>
+        </div>
+        <div id="lcsVisualization" class="visualization"></div>
+    </div>
+
+    <!-- LIS Tab -->
+    <div id="lis" class="tab-content">
+        <div class="input-group">
+            Sequence: <input type="text" id="sequence" placeholder="e.g., 3 1 4 1 5 9">
+            <button onclick="visualizeLIS()">Visualize</button>
+        </div>
+        <div id="lisVisualization" class="visualization"></div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            const tabLinks = document.getElementsByClassName("tab-link");
+            
+            for (let content of tabContents) content.classList.remove("active");
+            for (let link of tabLinks) link.classList.remove("active");
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Fibonacci Visualization
+        function visualizeFibonacci() {
+            const n = parseInt(document.getElementById('fibInput').value);
+            const dp = [0, 1];
+            const visualization = document.getElementById('fibVisualization');
+            visualization.innerHTML = '';
+            
+            for (let i = 2; i <= n; i++) {
+                dp[i] = dp[i-1] + dp[i-2];
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'dp-table';
+                
+                for (let j = 0; j <= i; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'dp-cell' + (j === i ? ' highlight' : '');
+                    cell.textContent = dp[j];
+                    stepDiv.appendChild(cell);
+                }
+                
+                visualization.appendChild(stepDiv);
+            }
+        }
+
+        // Knapsack Visualization
+        function visualizeKnapsack() {
+            const capacity = parseInt(document.getElementById('capacity').value);
+            const weights = document.getElementById('weights').value.split(' ').map(Number);
+            const values = document.getElementById('values').value.split(' ').map(Number);
+            const n = weights.length;
+            const dp = Array(n+1).fill().map(() => Array(capacity+1).fill(0));
+            const visualization = document.getElementById('knapsackVisualization');
+            visualization.innerHTML = '';
+            
+            for (let i = 1; i <= n; i++) {
+                for (let w = 1; w <= capacity; w++) {
+                    if (weights[i-1] > w) {
+                        dp[i][w] = dp[i-1][w];
+                    } else {
+                        dp[i][w] = Math.max(dp[i-1][w], dp[i-1][w - weights[i-1]] + values[i-1]);
+                    }
+                }
+                
+                const table = document.createElement('div');
+                table.className = 'dp-table';
+                
+                for (let row of dp) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'dp-row';
+                    for (let cell of row) {
+                        const cellDiv = document.createElement('div');
+                        cellDiv.className = 'dp-cell';
+                        cellDiv.textContent = cell;
+                        rowDiv.appendChild(cellDiv);
+                    }
+                    table.appendChild(rowDiv);
+                }
+                
+                visualization.appendChild(table);
+            }
+        }
+
+        // LCS Visualization
+        function visualizeLCS() {
+            const str1 = document.getElementById('str1').value;
+            const str2 = document.getElementById('str2').value;
+            const m = str1.length, n = str2.length;
+            const dp = Array(m+1).fill().map(() => Array(n+1).fill(0));
+            const visualization = document.getElementById('lcsVisualization');
+            visualization.innerHTML = '';
+            
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (str1[i-1] === str2[j-1]) {
+                        dp[i][j] = dp[i-1][j-1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                    }
+                }
+            }
+            
+            const table = document.createElement('div');
+            table.className = 'dp-table';
+            
+            // Create header row
+            const headerRow = document.createElement('div');
+            headerRow.className = 'dp-row';
+            headerRow.appendChild(createCell(''));
+            for (let c of str2) headerRow.appendChild(createCell(c));
+            table.appendChild(headerRow);
+            
+            // Create data rows
+            for (let i = 0; i <= m; i++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'dp-row';
+                rowDiv.appendChild(createCell(i > 0 ? str1[i-1] : ''));
+                for (let j = 0; j <= n; j++) {
+                    rowDiv.appendChild(createCell(dp[i][j]));
+                }
+                table.appendChild(rowDiv);
+            }
+            
+            visualization.appendChild(table);
+            
+            function createCell(content) {
+                const cell = document.createElement('div');
+                cell.className = 'dp-cell';
+                cell.textContent = content;
+                return cell;
+            }
+        }
+
+        // LIS Visualization
+        function visualizeLIS() {
+            const nums = document.getElementById('sequence').value.split(' ').map(Number);
+            const dp = Array(nums.length).fill(1);
+            const visualization = document.getElementById('lisVisualization');
+            visualization.innerHTML = '';
+            
+            for (let i = 1; i < nums.length; i++) {
+                for (let j = 0; j < i; j++) {
+                    if (nums[i] > nums[j] && dp[i] <= dp[j]) {
+                        dp[i] = dp[j] + 1;
+                    }
+                }
+            }
+            
+            const sequenceDiv = document.createElement('div');
+            sequenceDiv.className = 'sequence';
+            
+            for (let i = 0; i < nums.length; i++) {
+                const item = document.createElement('div');
+                item.className = 'sequence-item';
+                item.textContent = nums[i];
+                if (dp[i] > 1) item.style.backgroundColor = `hsl(${dp[i] * 60}, 70%, 80%)`;
+                sequenceDiv.appendChild(item);
+            }
+            
+            visualization.appendChild(sequenceDiv);
+        }
+    </script>
+</body>
+</html>

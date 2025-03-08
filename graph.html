@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        #canvas {
+            background-color: white;
+            cursor: crosshair;
+        }
+
+        .controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        button, select {
+            margin: 5px;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edge {
+            position: absolute;
+            background-color: #999;
+            transform-origin: 0% 0%;
+            pointer-events: none;
+        }
+
+        .edge-weight {
+            position: absolute;
+            color: #333;
+            font-size: 12px;
+            background: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .selected {
+            background-color: #2196F3 !important;
+            transform: scale(1.2);
+        }
+
+        .visited {
+            background-color: #FF5722 !important;
+        }
+
+        .path {
+            background-color: #9C27B0 !important;
+        }
+
+        .current {
+            background-color: #FFC107 !important;
+        }
+
+        #status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button onclick="toggleMode('addNode')">Add Node</button>
+        <button onclick="toggleMode('addEdge')">Add Edge</button>
+        <button onclick="toggleMode('move')">Move Nodes</button>
+        <select id="algorithm">
+            <option value="bfs">BFS</option>
+            <option value="dfs">DFS</option>
+            <option value="dijkstra">Dijkstra's</option>
+            <option value="prim">Prim's</option>
+        </select>
+        <button onclick="startAlgorithm()">Start</button>
+        <button onclick="clearGraph()">Clear</button>
+        <input type="number" id="startNode" placeholder="Start node ID">
+    </div>
+    <div id="status">Status: Ready</div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let nodes = [];
+        let edges = [];
+        let selectedNode = null;
+        let currentMode = 'addNode';
+        let isRunning = false;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Node {
+            constructor(x, y, id) {
+                this.x = x;
+                this.y = y;
+                this.id = id;
+                this.connections = [];
+                this.visited = false;
+                this.distance = Infinity;
+                this.previous = null;
+                this.element = this.createDOMElement();
+            }
+
+            createDOMElement() {
+                const element = document.createElement('div');
+                element.className = 'node';
+                element.style.left = `${this.x - 20}px`;
+                element.style.top = `${this.y - 20}px`;
+                element.textContent = this.id;
+                document.body.appendChild(element);
+                return element;
+            }
+
+            updatePosition(x, y) {
+                this.x = x;
+                this.y = y;
+                this.element.style.left = `${x - 20}px`;
+                this.element.style.top = `${y - 20}px`;
+            }
+        }
+
+        class Edge {
+            constructor(nodeA, nodeB, weight) {
+                this.nodeA = nodeA;
+                this.nodeB = nodeB;
+                this.weight = weight;
+                this.element = this.createDOMElement();
+                this.weightElement = this.createWeightElement();
+                this.updateElement();
+            }
+
+            createDOMElement() {
+                const element = document.createElement('div');
+                element.className = 'edge';
+                document.body.appendChild(element);
+                return element;
+            }
+
+            createWeightElement() {
+                const element = document.createElement('div');
+                element.className = 'edge-weight';
+                document.body.appendChild(element);
+                return element;
+            }
+
+            updateElement() {
+                const dx = this.nodeB.x - this.nodeA.x;
+                const dy = this.nodeB.y - this.nodeA.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx);
+                
+                this.element.style.width = `${length}px`;
+                this.element.style.left = `${this.nodeA.x}px`;
+                this.element.style.top = `${this.nodeA.y}px`;
+                this.element.style.transform = `rotate(${angle}rad)`;
+
+                const midX = (this.nodeA.x + this.nodeB.x) / 2;
+                const midY = (this.nodeA.y + this.nodeB.y) / 2;
+                this.weightElement.style.left = `${midX - 15}px`;
+                this.weightElement.style.top = `${midY - 10}px`;
+                this.weightElement.textContent = this.weight;
+            }
+        }
+
+        // [Previous event listeners and helper functions from earlier example...]
+        // Add similar event listeners for node/edge creation and movement
+
+        async function bfs(startNode) {
+            const queue = [startNode];
+            startNode.visited = true;
+            startNode.element.classList.add('visited');
+            
+            while (queue.length > 0 && !isRunning) {
+                const currentNode = queue.shift();
+                currentNode.element.classList.add('current');
+                updateStatus(`Visiting node ${currentNode.id}`);
+                
+                await sleep(1000);
+                
+                for (const edge of currentNode.connections) {
+                    const neighbor = edge.nodeB;
+                    if (!neighbor.visited) {
+                        neighbor.visited = true;
+                        neighbor.element.classList.add('visited');
+                        queue.push(neighbor);
+                        await sleep(500);
+                    }
+                }
+                currentNode.element.classList.remove('current');
+            }
+        }
+
+        async function dijkstra(startNode) {
+            const pq = new PriorityQueue((a, b) => a.distance < b.distance);
+            startNode.distance = 0;
+            pq.enqueue(startNode);
+
+            while (!pq.isEmpty() && !isRunning) {
+                const current = pq.dequeue();
+                current.element.classList.add('visited');
+                updateStatus(`Visiting node ${current.id} (Distance: ${current.distance})`);
+
+                await sleep(1000);
+
+                for (const edge of current.connections) {
+                    const neighbor = edge.nodeB;
+                    const alt = current.distance + edge.weight;
+                    
+                    if (alt < neighbor.distance) {
+                        neighbor.distance = alt;
+                        neighbor.previous = current;
+                        pq.enqueue(neighbor);
+                        neighbor.element.classList.add('current');
+                        await sleep(500);
+                        neighbor.element.classList.remove('current');
+                    }
+                }
+            }
+        }
+
+        async function prim(startNode) {
+            const pq = new PriorityQueue((a, b) => a.weight < b.weight);
+            startNode.visited = true;
+            
+            for (const edge of startNode.connections) {
+                pq.enqueue(edge);
+            }
+
+            while (!pq.isEmpty() && !isRunning) {
+                const edge = pq.dequeue();
+                edge.element.style.backgroundColor = '#FF5722';
+                await sleep(1000);
+
+                if (!edge.nodeB.visited) {
+                    edge.nodeB.visited = true;
+                    updateStatus(`Added edge ${edge.nodeA.id}-${edge.nodeB.id} (Weight: ${edge.weight})`);
+
+                    for (const nextEdge of edge.nodeB.connections) {
+                        if (!nextEdge.nodeB.visited) {
+                            pq.enqueue(nextEdge);
+                        }
+                    }
+                }
+            }
+        }
+
+        class PriorityQueue {
+            constructor(comparator) {
+                this.heap = [];
+                this.comparator = comparator;
+            }
+
+            enqueue(item) {
+                this.heap.push(item);
+                this.heap.sort((a, b) => this.comparator(a, b) ? -1 : 1);
+            }
+
+            dequeue() {
+                return this.heap.shift();
+            }
+
+            isEmpty() {
+                return this.heap.length === 0;
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function updateStatus(text) {
+            document.getElementById('status').textContent = `Status: ${text}`;
+        }
+
+        function startAlgorithm() {
+            if (isRunning) return;
+            
+            const algorithm = document.getElementById('algorithm').value;
+            const startId = parseInt(document.getElementById('startNode').value);
+            const startNode = nodes.find(n => n.id === startId);
+
+            if (!startNode) {
+                updateStatus('Invalid start node');
+                return;
+            }
+
+            resetGraph();
+            isRunning = true;
+
+            switch(algorithm) {
+                case 'bfs':
+                    bfs(startNode);
+                    break;
+                case 'dfs':
+                    dfs(startNode);
+                    break;
+                case 'dijkstra':
+                    dijkstra(startNode);
+                    break;
+                case 'prim':
+                    prim(startNode);
+                    break;
+            }
+        }
+
+        function resetGraph() {
+            nodes.forEach(node => {
+                node.visited = false;
+                node.distance = Infinity;
+                node.previous = null;
+                node.element.className = 'node';
+            });
+            edges.forEach(edge => {
+                edge.element.style.backgroundColor = '#999';
+            });
+        }
+
+        function clearGraph() {
+            // Implementation similar to previous example
+        }
+    </script>
+</body>
+</html>

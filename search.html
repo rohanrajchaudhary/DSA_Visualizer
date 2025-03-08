@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .array-container {
+            display: flex;
+            margin: 20px;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .array-element {
+            width: 50px;
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .current {
+            background-color: #2196F3 !important;
+            transform: scale(1.1);
+        }
+
+        .found {
+            background-color: #FF5722 !important;
+            transform: scale(1.2);
+        }
+
+        .controls {
+            margin: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Algorithm Visualizer</h1>
+    
+    <div class="controls">
+        <input type="number" id="targetValue" placeholder="Enter target value">
+        <button onclick="generateNewArray()">Generate New Array</button>
+        <button onclick="startLinearSearch()">Linear Search</button>
+        <button onclick="startBinarySearch()">Binary Search</button>
+    </div>
+
+    <div class="array-container" id="arrayContainer"></div>
+    <div id="status"></div>
+
+    <script>
+        let array = [];
+        let isSearching = false;
+
+        function generateNewArray() {
+            if (isSearching) return;
+            array = [];
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 15; i++) {
+                const value = Math.floor(Math.random() * 50) + 1;
+                array.push(value);
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = value;
+                container.appendChild(element);
+            }
+            
+            array.sort((a, b) => a - b); // For binary search
+            updateArrayDisplay();
+        }
+
+        function updateArrayDisplay() {
+            const elements = document.getElementsByClassName('array-element');
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].textContent = array[i];
+                elements[i].classList.remove('current', 'found');
+            }
+        }
+
+        async function linearSearch(target) {
+            isSearching = true;
+            const elements = document.getElementsByClassName('array-element');
+            const status = document.getElementById('status');
+            
+            for (let i = 0; i < array.length; i++) {
+                elements[i].classList.add('current');
+                status.textContent = `Checking index ${i} (value: ${array[i]})`;
+                
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                if (array[i] === target) {
+                    elements[i].classList.remove('current');
+                    elements[i].classList.add('found');
+                    status.textContent = `Found ${target} at index ${i}!`;
+                    isSearching = false;
+                    return;
+                }
+                
+                elements[i].classList.remove('current');
+            }
+            
+            status.textContent = `${target} not found in array`;
+            isSearching = false;
+        }
+
+        async function binarySearch(target) {
+            isSearching = true;
+            const elements = document.getElementsByClassName('array-element');
+            const status = document.getElementById('status');
+            
+            let low = 0;
+            let high = array.length - 1;
+
+            while (low <= high) {
+                const mid = Math.floor((low + high) / 2);
+                elements[mid].classList.add('current');
+                status.textContent = `Checking mid point ${mid} (value: ${array[mid]})`;
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                if (array[mid] === target) {
+                    elements[mid].classList.remove('current');
+                    elements[mid].classList.add('found');
+                    status.textContent = `Found ${target} at index ${mid}!`;
+                    isSearching = false;
+                    return;
+                }
+
+                if (array[mid] < target) {
+                    status.textContent = `Searching right half (${mid + 1} to ${high})`;
+                    for (let i = low; i <= mid; i++) {
+                        elements[i].classList.add('disabled');
+                    }
+                    low = mid + 1;
+                } else {
+                    status.textContent = `Searching left half (${low} to ${mid - 1})`;
+                    for (let i = mid; i <= high; i++) {
+                        elements[i].classList.add('disabled');
+                    }
+                    high = mid - 1;
+                }
+
+                elements[mid].classList.remove('current');
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            status.textContent = `${target} not found in array`;
+            isSearching = false;
+        }
+
+        function startLinearSearch() {
+            if (isSearching) return;
+            const target = parseInt(document.getElementById('targetValue').value);
+            if (!isNaN(target)) linearSearch(target);
+        }
+
+        function startBinarySearch() {
+            if (isSearching) return;
+            const target = parseInt(document.getElementById('targetValue').value);
+            if (!isNaN(target)) binarySearch(target);
+        }
+
+        // Initial array generation
+        generateNewArray();
+    </script>
+</body>
+</html>

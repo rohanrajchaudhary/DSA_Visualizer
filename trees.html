@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Algorithm Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            margin: 20px;
+            text-align: center;
+        }
+
+        .tree-container {
+            position: relative;
+            margin: 40px 0;
+            min-height: 500px;
+        }
+
+        .node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            transition: all 0.3s;
+        }
+
+        .node.highlight {
+            background-color: #FF5722;
+            transform: scale(1.2);
+        }
+
+        .line {
+            position: absolute;
+            background-color: #666;
+            transform-origin: 0 0;
+        }
+
+        .controls {
+            margin: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            width: 120px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .traversal-order {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Binary Search Tree Visualizer</h1>
+        <div class="controls">
+            <input type="number" id="valueInput" placeholder="Enter value">
+            <button onclick="insertNode()">Insert</button>
+            <button onclick="startTraversal('inorder')">Inorder</button>
+            <button onclick="startTraversal('preorder')">Preorder</button>
+            <button onclick="startTraversal('postorder')">Postorder</button>
+            <button onclick="clearTree()">Clear</button>
+        </div>
+        <div class="tree-container" id="treeContainer"></div>
+        <div class="traversal-order" id="traversalOrder"></div>
+    </div>
+
+    <script>
+        class TreeNode {
+            constructor(value) {
+                this.value = value;
+                this.left = null;
+                this.right = null;
+                this.x = 0;
+                this.y = 0;
+                this.element = null;
+            }
+        }
+
+        let root = null;
+        const nodeWidth = 40;
+        const nodeHeight = 40;
+        const levelHeight = 80;
+        const animationDuration = 800;
+        let isAnimating = false;
+
+        function createNodeElement(value) {
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.textContent = value;
+            return node;
+        }
+
+        function updateTreeVisual() {
+            const container = document.getElementById('treeContainer');
+            container.innerHTML = '';
+            traverseTree(root, container, container.offsetWidth / 2, 20, container.offsetWidth / 4);
+        }
+
+        function traverseTree(node, container, x, y, offset) {
+            if (!node) return;
+
+            node.x = x;
+            node.y = y;
+            
+            if (!node.element) {
+                node.element = createNodeElement(node.value);
+            }
+            
+            node.element.style.left = `${x - nodeWidth/2}px`;
+            node.element.style.top = `${y}px`;
+            container.appendChild(node.element);
+
+            if (node.left) {
+                const leftX = x - offset;
+                const leftY = y + levelHeight;
+                drawLine(x, y + nodeHeight/2, leftX, leftY - nodeHeight/2);
+                traverseTree(node.left, container, leftX, leftY, offset/2);
+            }
+
+            if (node.right) {
+                const rightX = x + offset;
+                const rightY = y + levelHeight;
+                drawLine(x, y + nodeHeight/2, rightX, rightY - nodeHeight/2);
+                traverseTree(node.right, container, rightX, rightY, offset/2);
+            }
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            const line = document.createElement('div');
+            line.className = 'line';
+            
+            const length = Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            
+            line.style.width = `${length}px`;
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.transform = `rotate(${angle}rad)`;
+            
+            document.getElementById('treeContainer').appendChild(line);
+        }
+
+        function insertNode() {
+            if (isAnimating) return;
+            
+            const value = parseInt(document.getElementById('valueInput').value);
+            if (isNaN(value)) return;
+
+            if (!root) {
+                root = new TreeNode(value);
+            } else {
+                insertRecursive(root, value);
+            }
+            
+            updateTreeVisual();
+            document.getElementById('valueInput').value = '';
+        }
+
+        function insertRecursive(node, value) {
+            if (value < node.value) {
+                if (!node.left) {
+                    node.left = new TreeNode(value);
+                } else {
+                    insertRecursive(node.left, value);
+                }
+            } else {
+                if (!node.right) {
+                    node.right = new TreeNode(value);
+                } else {
+                    insertRecursive(node.right, value);
+                }
+            }
+        }
+
+        async function traverse(node, order, result = []) {
+            if (!node) return;
+
+            if (order === 'preorder') {
+                result.push(node);
+                await highlightNode(node);
+            }
+
+            await traverse(node.left, order, result);
+
+            if (order === 'inorder') {
+                result.push(node);
+                await highlightNode(node);
+            }
+
+            await traverse(node.right, order, result);
+
+            if (order === 'postorder') {
+                result.push(node);
+                await highlightNode(node);
+            }
+
+            return result;
+        }
+
+        async function highlightNode(node) {
+            return new Promise(resolve => {
+                node.element.classList.add('highlight');
+                document.getElementById('traversalOrder').textContent += node.value + ' ';
+                
+                setTimeout(() => {
+                    node.element.classList.remove('highlight');
+                    resolve();
+                }, animationDuration);
+            });
+        }
+
+        async function startTraversal(order) {
+            if (isAnimating || !root) return;
+            
+            isAnimating = true;
+            document.getElementById('traversalOrder').textContent = '';
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            await traverse(root, order);
+
+            buttons.forEach(btn => btn.disabled = false);
+            isAnimating = false;
+        }
+
+        function clearTree() {
+            root = null;
+            document.getElementById('treeContainer').innerHTML = '';
+            document.getElementById('traversalOrder').textContent = '';
+        }
+
+        // Initial setup
+        window.addEventListener('resize', updateTreeVisual);
+    </script>
+</body>
+</html>

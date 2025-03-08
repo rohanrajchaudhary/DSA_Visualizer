@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coder Army 3rd Hackathon</title>
+
+   
+  
+        <h4 class="gradient-heading">CODER ARMY THIRD HACKATHON</h4>
+  
+
+
+
+    <button class="btn gradient-btn"><a href="index.html">CLICK FOR DSA VISUALIZER</a></button>
+
+
+   
+
+
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .hackathon-title {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        .gradient-flower {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            margin: 2rem auto;
+            animation: flowerRotate 20s linear infinite;
+        }
+
+        .petal {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff8e8e);
+            border-radius: 50% 50% 0 50%;
+            transform-origin: 150px 150px;
+            opacity: 0.8;
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 800px;
+            margin: 2rem 0;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: fadeUp 1s forwards;
+            animation-delay: 0.5s;
+        }
+
+
+        /* Base Button Styles */
+
+        .btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+}
+
+
+/* Gradient Button */
+
+.gradient-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+        .outro-box {
+            animation-delay: 1s;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes flowerRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-text {
+            color: white;
+            text-align: center;
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, #4ecdc4, transparent);
+            border-radius: 50%;
+            animation: particleFloat 3s infinite;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) scale(0); }
+            50% { transform: translateY(-100px) scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .hackathon-title {
+                font-size: 2.5rem;
+            }
+            
+            .gradient-flower {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
+
+        .margin-container {
+  width: 100%;
+}
+
+.centered-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 12px 24px;
+  background: #E91E63;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+
+
+
+body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+        }
+
+        .gradient-btn {
+            position: relative;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, 
+                #ff6b6b 0%, 
+                #4ecdc4 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+        }
+
+        .gradient-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: all 0.6s ease;
+        }
+
+        .gradient-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-btn:hover::before {
+            left: 100%;
+        }
+
+        .gradient-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial Black', sans-serif;
+        }
+
+        .gradient-heading {
+            justify-content: center;
+            align-items: center;
+            text-transform: uppercase;
+            font-size: 5rem;
+            background: linear-gradient(45deg, 
+                #eb4c0d, 
+                #f1f0ef, 
+                #51f477);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            .gradient-heading {
+                font-size: 3rem;
+            }
+        }
+
+
+
+
+       
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <!-- Introduction -->
+        <h1 class="hackathon-title">CODER ARMY<br>THIRD HACKATHON</h1>
+        
+        <div class="gradient-flower">
+            <!-- Generated petals via JS -->
+        </div>
+
+        <div class="content-box">
+            <div class="floating-text">
+                <h2>Welcome to the Third Edition! 🌟</h2>
+                <p class="highlight">Non Stop Coding Marathon ⏰</p>
+                <p>Join developers, designers, and innovators from across the globe in this epic coding challenge.</p>
+                <p>Theme: <span class="highlight">"D.S.A. VISUALIZER"</span></p>
+                <p>🏆 🥇 ₹11,000 | 🥈 ₹8,000 | 🥉 ₹5,000
+                    4th-5th: ₹3,000 each | 6th-10th: ₹2,000 each | 11th-20th: ₹1,000 each in Prizes | 🚀 Mentorship Sessions | 🌍 Global Networking</p>
+            </div>
+        </div>
+
+        <!-- Outroduction -->
+        <div class="content-box outro-box">
+            <div class="floating-text">
+                <h2>Thank You for Participating! 🙏</h2>
+                <p>Stay tuned for results announcement and future events!</p>
+                <p class="highlight">Keep Coding, Keep Innovating! 💻✨</p>
+                <p>Follow us for updates: @coderarmy</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create flower petals
+        const flower = document.querySelector('.gradient-flower');
+        for(let i = 0; i < 12; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            petal.style.transform = `rotate(${i * 30}deg)`;
+            flower.appendChild(petal);
+        }
+
+        // Create floating particles
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = Math.random() * 3 + 2 + 's';
+            particle.style.width = particle.style.height = Math.random() * 10 + 5 + 'px';
+            document.getElementById('particles').appendChild(particle);
+            
+            setTimeout(() => particle.remove(), 5000);
+        }
+
+        setInterval(createParticle, 300);
+
+        // Animate letters
+        const title = document.querySelector('.hackathon-title');
+        title.innerHTML = title.textContent.split('').map((letter, i) => 
+            `<span style="animation: titleFloat 3s ${i * 0.1}s infinite">${letter}</span>`
+        ).join('');
+    </script>
+</body>
+</html>

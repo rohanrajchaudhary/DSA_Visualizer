@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Algorithms Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ddd;
+            border: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .visualizer {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .algorithm {
+            margin: 20px 0;
+        }
+
+        .input-group {
+            margin: 10px 0;
+        }
+
+        input {
+            padding: 8px;
+            width: 100px;
+            margin: 0 5px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .matrix {
+            display: grid;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .matrix-cell {
+            width: 50px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        .prime-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            max-width: 500px;
+        }
+
+        .prime-number {
+            padding: 10px;
+            text-align: center;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            transition: all 0.3s;
+        }
+
+        .prime-number.marked {
+            background-color: #ff8a80;
+        }
+
+        .prime-number.prime {
+            background-color: #90CAF9;
+        }
+
+        .gcd-visualization {
+            padding: 20px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+
+        .step {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showAlgorithm('sieve')">Sieve of Eratosthenes</button>
+            <button class="tab" onclick="showAlgorithm('gcd')">Euclidean GCD</button>
+            <button class="tab" onclick="showAlgorithm('matrix')">Matrix Multiplication</button>
+        </div>
+
+        <!-- Sieve of Eratosthenes -->
+        <div id="sieve" class="visualizer">
+            <h2>Sieve of Eratosthenes</h2>
+            <div class="input-group">
+                <input type="number" id="limit" placeholder="Enter limit" min="2" value="50">
+                <button onclick="runSieve()">Generate Primes</button>
+                <button onclick="clearPrimes()">Clear</button>
+            </div>
+            <div class="prime-grid" id="primeGrid"></div>
+        </div>
+
+        <!-- Euclidean GCD -->
+        <div id="gcd" class="visualizer" style="display: none;">
+            <h2>Euclidean Algorithm</h2>
+            <div class="input-group">
+                <input type="number" id="num1" placeholder="Number 1" min="1" value="56">
+                <input type="number" id="num2" placeholder="Number 2" min="1" value="98">
+                <button onclick="calculateGCD()">Calculate GCD</button>
+                <button onclick="clearGCD()">Clear</button>
+            </div>
+            <div id="gcdSteps" class="gcd-visualization"></div>
+        </div>
+
+        <!-- Matrix Multiplication -->
+        <div id="matrix" class="visualizer" style="display: none;">
+            <h2>Matrix Multiplication</h2>
+            <div class="input-group">
+                <button onclick="generateMatrices()">Generate Matrices</button>
+                <button onclick="multiplyMatrices()">Multiply</button>
+                <button onclick="clearMatrices()">Clear</button>
+            </div>
+            <div id="matrixA" class="matrix"></div>
+            <div id="matrixB" class="matrix"></div>
+            <div id="matrixResult" class="matrix"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentAlgorithm = 'sieve';
+        const animationDelay = 500;
+
+        // Tabs functionality
+        function showAlgorithm(algorithm) {
+            document.getElementById(currentAlgorithm).style.display = 'none';
+            document.querySelector(`.tab.${currentAlgorithm}`).classList.remove('active');
+            currentAlgorithm = algorithm;
+            document.getElementById(algorithm).style.display = 'block';
+            document.querySelector(`.tab.${algorithm}`).classList.add('active');
+        }
+
+        // Sieve of Eratosthenes implementation
+        async function runSieve() {
+            const limit = parseInt(document.getElementById('limit').value) || 50;
+            const numbers = Array(limit + 1).fill(true);
+            numbers[0] = numbers[1] = false;
+            
+            const grid = document.getElementById('primeGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i <= limit; i++) {
+                const div = document.createElement('div');
+                div.className = 'prime-number';
+                div.textContent = i;
+                grid.appendChild(div);
+            }
+
+            for (let p = 2; p * p <= limit; p++) {
+                if (numbers[p]) {
+                    for (let i = p * p; i <= limit; i += p) {
+                        numbers[i] = false;
+                        await highlightNumber(i, '#ff8a80');
+                    }
+                }
+            }
+
+            for (let i = 2; i <= limit; i++) {
+                if (numbers[i]) {
+                    await highlightNumber(i, '#90CAF9');
+                }
+            }
+        }
+
+        async function highlightNumber(number, color) {
+            const div = document.querySelector(`.prime-number:nth-child(${number + 1})`);
+            div.style.backgroundColor = color;
+            await new Promise(resolve => setTimeout(resolve, animationDelay));
+        }
+
+        function clearPrimes() {
+            document.getElementById('primeGrid').innerHTML = '';
+        }
+
+        // Euclidean GCD implementation
+        async function calculateGCD() {
+            let a = parseInt(document.getElementById('num1').value) || 56;
+            let b = parseInt(document.getElementById('num2').value) || 98;
+            const stepsDiv = document.getElementById('gcdSteps');
+            stepsDiv.innerHTML = '';
+
+            while (b !== 0) {
+                const step = document.createElement('div');
+                step.className = 'step';
+                step.innerHTML = `GCD(${a}, ${b}) = GCD(${b}, ${a % b})`;
+                stepsDiv.appendChild(step);
+                
+                [a, b] = [b, a % b];
+                await new Promise(resolve => setTimeout(resolve, animationDelay));
+            }
+
+            const result = document.createElement('div');
+            result.className = 'step';
+            result.innerHTML = `<strong>GCD is ${a}</strong>`;
+            stepsDiv.appendChild(result);
+        }
+
+        function clearGCD() {
+            document.getElementById('gcdSteps').innerHTML = '';
+        }
+
+        // Matrix Multiplication implementation
+        function generateMatrices() {
+            createMatrix('matrixA', 2, 3);
+            createMatrix('matrixB', 3, 2);
+        }
+
+        function createMatrix(containerId, rows, cols) {
+            const container = document.getElementById(containerId);
+            container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            container.innerHTML = '';
+            
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const input = document.createElement('input');
+                    input.className = 'matrix-cell';
+                    input.value = Math.floor(Math.random() * 5) + 1;
+                    container.appendChild(input);
+                }
+            }
+        }
+
+        async function multiplyMatrices() {
+            const matrixA = getMatrixValues('matrixA');
+            const matrixB = getMatrixValues('matrixB');
+            const result = document.getElementById('matrixResult');
+            
+            if (matrixA[0].length !== matrixB.length) {
+                alert("Matrices cannot be multiplied!");
+                return;
+            }
+
+            const product = new Array(matrixA.length).fill(0)
+                            .map(() => new Array(matrixB[0].length).fill(0));
+
+            result.style.gridTemplateColumns = `repeat(${matrixB[0].length}, 1fr)`;
+            result.innerHTML = '';
+
+            for (let i = 0; i < matrixA.length; i++) {
+                for (let j = 0; j < matrixB[0].length; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < matrixB.length; k++) {
+                        sum += matrixA[i][k] * matrixB[k][j];
+                        await visualizeStep(i, j, k, matrixA[i][k], matrixB[k][j], sum);
+                    }
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.textContent = sum;
+                    result.appendChild(cell);
+                }
+            }
+        }
+
+        async function visualizeStep(i, j, k, aVal, bVal, sum) {
+            const cellsA = document.querySelectorAll('#matrixA .matrix-cell');
+            const cellsB = document.querySelectorAll('#matrixB .matrix-cell');
+            
+            // Highlight current elements
+            cellsA[i * 3 + k].style.backgroundColor = '#90CAF9';
+            cellsB[k * 2 + j].style.backgroundColor = '#90CAF9';
+            
+            await new Promise(resolve => setTimeout(resolve, animationDelay));
+            
+            // Reset colors
+            cellsA[i * 3 + k].style.backgroundColor = '';
+            cellsB[k * 2 + j].style.backgroundColor = '';
+        }
+
+        function getMatrixValues(containerId) {
+            const inputs = document.querySelectorAll(`#${containerId} .matrix-cell`);
+            const rows = [];
+            let currentRow = [];
+            
+            inputs.forEach((input, index) => {
+                currentRow.push(parseInt(input.value) || 0);
+                if ((index + 1) % (containerId === 'matrixA' ? 3 : 2) === 0) {
+                    rows.push(currentRow);
+                    currentRow = [];
+                }
+            });
+            
+            return rows;
+        }
+
+        function clearMatrices() {
+            ['matrixA', 'matrixB', 'matrixResult'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+            });
+        }
+
+        // Initialize matrices on load
+        generateMatrices();
+    </script>
+</body>
+</html>

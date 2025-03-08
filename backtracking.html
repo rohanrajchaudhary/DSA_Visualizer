@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtracking Visualizer - N Queens</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            margin: 20px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            background-color: #333;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .cell.queen {
+            background-color: #90CAF9;
+        }
+
+        .cell.conflict {
+            background-color: #FF8A80;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>N-Queens Backtracking Visualizer</h1>
+        <div class="controls">
+            <button onclick="startSolving()" id="startBtn">Start</button>
+            <button onclick="resetBoard()">Reset</button>
+        </div>
+        <div class="board" id="board"></div>
+        <div class="status" id="status">Click Start to begin</div>
+    </div>
+
+    <script>
+        const N = 4;
+        let board = [];
+        let solving = false;
+        let delay = 1000; // Animation delay in ms
+
+        function initializeBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+            boardElement.innerHTML = '';
+            
+            for (let i = 0; i < N; i++) {
+                board[i] = Array(N).fill(0);
+                for (let j = 0; j < N; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        async function placeQueen(row, col) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            cell.textContent = '♕';
+            cell.classList.add('queen');
+            board[row][col] = 1;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+        async function removeQueen(row, col) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            cell.textContent = '';
+            cell.classList.remove('queen');
+            board[row][col] = 0;
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+        function isSafe(row, col) {
+            // Check column
+            for (let i = 0; i < row; i++) {
+                if (board[i][col] === 1) return false;
+            }
+
+            // Check left diagonal
+            for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+                if (board[i][j] === 1) return false;
+            }
+
+            // Check right diagonal
+            for (let i = row, j = col; i >= 0 && j < N; i--, j++) {
+                if (board[i][j] === 1) return false;
+            }
+
+            return true;
+        }
+
+        async function solveNQueens(row = 0) {
+            if (row >= N) return true;
+
+            for (let col = 0; col < N; col++) {
+                updateStatus(`Trying to place queen at row ${row}, column ${col}`);
+                
+                if (isSafe(row, col)) {
+                    await placeQueen(row, col);
+                    
+                    if (await solveNQueens(row + 1)) {
+                        return true;
+                    }
+
+                    updateStatus(`Backtracking from row ${row}, column ${col}`);
+                    await removeQueen(row, col);
+                }
+            }
+            return false;
+        }
+
+        async function startSolving() {
+            if (solving) return;
+            solving = true;
+            document.getElementById('startBtn').disabled = true;
+            
+            initializeBoard();
+            const solved = await solveNQueens();
+            
+            if (solved) {
+                updateStatus('Solution found!');
+            } else {
+                updateStatus('No solution exists');
+            }
+            
+            document.getElementById('startBtn').disabled = false;
+            solving = false;
+        }
+
+        function resetBoard() {
+            solving = false;
+            initializeBoard();
+            updateStatus('Board reset');
+        }
+
+        // Initialize on load
+        initializeBoard();
+    </script>
+</body>
+</html>
